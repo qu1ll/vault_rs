@@ -1,4 +1,16 @@
 use std::{fs, io::{self, Write}};
+use clap::Parser;
+
+/// Search for a pattern in a file and display the lines that contain it.
+#[derive(Parser)]
+#[command(version, about, long_about = None)]
+struct Cli {
+    // The path to the file to read
+    #[arg(short, long)]
+    path: String, // Get input file containing passwords (change to default file location in the future)
+    
+    // path: std::path::PathBuf,
+}
 
 struct Data {
     username: String,
@@ -34,9 +46,10 @@ fn read_file(file_name: String) -> io::Result<Vec<Data>> {
 fn write_file(file_name: String) -> io::Result<()> {
     // Get user input on username and password of new entry
     print!("Enter username: ");
-    // io::stdout().flush().unwrap(); // Method to force print! to show in terminal
+    io::stdout().flush().unwrap(); // Method to force print! to show in terminal
     let username = read_input()?;
     print!("Enter password: ");
+    io::stdout().flush().unwrap(); // Method to force print! to show in terminal
     let password = read_input()?;
     let contents = format!("{username} : {password}\n");
 
@@ -48,12 +61,11 @@ fn write_file(file_name: String) -> io::Result<()> {
 }
 
 fn main() -> io::Result<()> {
-    print!("Enter file name containing passwords: ");
-    let file_name = read_input()?; // Get input file containing passwords (change to default file location in the future)
+    let args = Cli::parse();
 
-    let data = read_file(file_name.clone())?; //  Read data from file
+    let data = read_file(args.path.clone())?; //  Read data from file
     
-    write_file(file_name)?; // Write data to the file
+    write_file(args.path)?; // Write data to the file
     
     for data in data {
         println!("Username: {}, Password: {}", data.username, data.password); // Printing the data from the file
