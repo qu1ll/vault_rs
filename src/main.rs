@@ -1,15 +1,18 @@
 use std::{fs, io::{self, Write}};
-use clap::Parser;
+use clap::{Parser, Subcommand};
 
 /// Search for a pattern in a file and display the lines that contain it.
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
 struct Cli {
-    // The path to the file to read
-    #[arg(short, long)]
-    path: String, // Get input file containing passwords (change to default file location in the future)
-    
-    // path: std::path::PathBuf,
+    #[command(subcommand)]
+    cmd: Commands
+}
+
+#[derive(Subcommand, Debug, Clone)]
+enum Commands {
+    Read{file_path: String},
+    Write{file_path: String},
 }
 
 struct Data {
@@ -24,7 +27,7 @@ fn read_input() -> io::Result<String> {
     Ok(buffer.trim().to_string())
 }
 
-fn read_file(file_name: String) -> io::Result<Vec<Data>> {
+fn read_file(file_name: String) -> io::Result<()> {
     let file = fs::read_to_string(&file_name)?; // Read from file
     let mut data = Vec::new(); // Initialize vector that struct data will be pushed to
     
@@ -39,8 +42,12 @@ fn read_file(file_name: String) -> io::Result<Vec<Data>> {
             data.push(Data { username, password });
         }
     }
+
+    for data in data {
+        println!("Username: {}, Password: {}", data.username, data.password); // Printing the data from the file
+    }
     
-    Ok(data)
+    Ok(())
 }
 
 fn write_file(file_name: String) -> io::Result<()> {
@@ -63,13 +70,10 @@ fn write_file(file_name: String) -> io::Result<()> {
 fn main() -> io::Result<()> {
     let args = Cli::parse();
 
-    let data = read_file(args.path.clone())?; //  Read data from file
-    
-    write_file(args.path)?; // Write data to the file
-    
-    for data in data {
-        println!("Username: {}, Password: {}", data.username, data.password); // Printing the data from the file
+    match args.cmd {
+        Commands::Read{file_path} => read_file(file_path)?,
+        Commands::Write{file_path} => write_file(file_path)?
     }
-    
+
     Ok(())
 }
