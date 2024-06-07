@@ -1,33 +1,26 @@
-use crate::read_input;
-use crate::encrypt_data;
 use crate::decrypt_data;
-use crate::Data;
-use std::{fs, io::{self, Write}};
+use crate::encrypt_data;
+use crate::read_input;
+use std::{
+    fs,
+    io::{self, Write},
+};
 
 pub(crate) fn read_file(file_name: String) -> io::Result<()> {
-    let contents = decrypt_data(file_name.clone())?;
+    let contents = decrypt_data(file_name)?; // Decrypt the data within the file that is given
 
+    // Write the decrypted data to a temp file to then be read and printed to console
     let mut file = fs::File::create("temp.txt")?;
     file.write_all(&contents)?;
 
     let file = fs::read_to_string("temp.txt")?; // Read from file
-    let mut data = Vec::new(); // Initialize vector that struct data will be pushed to
 
-    // Iterate through each line read from the file than pull the data
-    for line in file.lines() {
-        let parts: Vec<_> = line.splitn(2, ":").collect(); // Split the line based on location of the ":"
+    // Split the line based on location of the ":"
+    let parts: Vec<_> = file.lines().next().unwrap().splitn(2, ":").collect();
+    let username = parts[0].trim().to_string();
+    let password = parts[1].trim().to_string();
 
-        // Take the new split string parts from the vector then push into the vector data struct
-        if parts.len() == 2 {
-            let username = parts[0].trim().to_string();
-            let password = parts[1].trim().to_string();
-            data.push(Data { username, password });
-        }
-    }
-
-    for data in data {
-        println!("Username: {}, Password: {}", data.username, data.password); // Printing the data from the file
-    }
+    println!("Username: {}, Password: {}", username, password); // Printing the data from the file
 
     fs::remove_file("temp.txt")?; // Remove the temp file
 
@@ -43,11 +36,11 @@ pub(crate) fn write_file(file_name: String) -> io::Result<()> {
     io::stdout().flush().unwrap(); // Method to force print! to show in terminal
     let password = read_input()?;
 
-    let contents = format!("{username} : {password}\n");
+    let contents = format!("{username} : {password}\n"); // Combine read inputs into one line
 
-    let contents = encrypt_data(contents.clone())?;
+    let contents = encrypt_data(contents.clone())?; // Send the combined string to be encrypted
 
-    // Append new entry into file
+    // Log new entry as file
     let mut file = fs::File::create(format!("passwords/{}", file_name))?;
     file.write_all(&contents)?;
 

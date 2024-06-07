@@ -1,5 +1,8 @@
 use sodiumoxide::crypto::{pwhash, secretbox};
-use std::{fs, io::{self, Write}};
+use std::{
+    fs,
+    io::{self, Write},
+};
 
 pub(crate) fn encrypt_data(text: String) -> io::Result<Vec<u8>> {
     let passwd = b"YOUR PASSWORD HERE";
