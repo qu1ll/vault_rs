@@ -9,14 +9,14 @@ mod user_input;
 use crate::{
     cli::{Args, Commands},
     crypto::{decrypt_data, encrypt_data},
-    file_io::{read_file, write_file},
+    file_io::{read_file, write_file, remove_file, read_dir},
     user_input::read_input,
 };
 
 fn main() -> io::Result<()> {
     loop {
         let mut buf = String::from(crate_name!());
-        buf.push_str(" "); // Add prompt indicator
+        buf.push_str(" "); // Add space for prompt
 
         io::stdin().read_line(&mut buf)?; // Use ? for error handling
         let line = buf.trim();
@@ -26,6 +26,8 @@ fn main() -> io::Result<()> {
             Ok(cli) => match cli.cmd {
                 Commands::Read { file_path } => read_file(file_path)?,
                 Commands::Write { file_path } => write_file(file_path)?,
+                Commands::Remove { file_path } => remove_file(file_path)?,
+                Commands::List { } => read_dir()?,
             },
             Err(e) => println!("Error: {}", e), // Handle parsing error
         }

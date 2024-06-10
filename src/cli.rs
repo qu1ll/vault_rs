@@ -12,4 +12,7 @@ pub struct Args {
 pub enum Commands {
     Read { file_path: String },
     Write { file_path: String },
+    Remove { file_path: String},
+    List {  },
+    // Help,
 }
